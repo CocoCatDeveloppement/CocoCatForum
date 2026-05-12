@@ -13,13 +13,13 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             pseudo TEXT NOT NULL,
             message TEXT NOT NULL,
-            date TEXT NOT NULL
+            date TEXT NOT NULL,
+            likes INTEGER NOT NULL DEFAULT 0
         )
     """)
 
     conn.commit()
     conn.close()
-
 
 init_db()
 
@@ -27,27 +27,36 @@ init_db()
 def index():
     conn = sqlite3.connect("/tmp/forum.db")
     cur = conn.cursor()
-    cur.execute("SELECT pseudo, message, date FROM messages ORDER BY id DESC")
+    cur.execute("SELECT id, pseudo, message, date, likes FROM messages ORDER BY id DESC")
     messages = cur.fetchall()
     conn.close()
 
     return render_template("index.html", messages=messages)
 
-
 @app.route("/post", methods=["POST"])
 def post():
     pseudo = request.form["pseudo"]
     message = request.form["message"]
+    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     conn = sqlite3.connect("/tmp/forum.db")
     cur = conn.cursor()
-    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
     cur.execute(
-    "INSERT INTO messages (pseudo, message, date) VALUES (?, ?, ?)",
-    (pseudo, message, date)
-)
+        "INSERT INTO messages (pseudo, message, date) VALUES (?, ?, ?)",
+        (pseudo, message, date)
+    )
+    conn.commit()
+    conn.close()
 
+    return redirect(url_for("index"))
+
+@app.route("/like", methods=["POST"])
+def like():
+    msg_id = request.form["id"]
+
+    conn = sqlite3.connect("/tmp/forum.db")
+    cur = conn.cursor()
+    cur.execute("UPDATE messages SET likes = likes + 1 WHERE id = ?", (msg_id,))
     conn.commit()
     conn.close()
 
