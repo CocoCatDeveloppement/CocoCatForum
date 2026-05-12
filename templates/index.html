@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>Forum de CocoCat</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js')  }}" defer></script>
 </head>
 
 <body>
@@ -19,7 +20,7 @@
 
     <button type="submit">Envoyer</button>
 </form>
-
+<div id="conteneur-message">
 {% for id, pseudo, message, date, likes in messages %}
 <div class="message">
     <p><strong>{{ pseudo }}</strong></p>
@@ -28,10 +29,11 @@
 
     <form action="/like" method="post">
         <input type="hidden" name="id" value="{{ id }}">
-        <button type="submit">{{ likes }} ❤️</button>
+        <button type="submit"><span class="likeButton">{{ likes }}</span> ❤️</button>
     </form>
 </div>
 {% endfor %}
+</div>
 
 </body>
 </html>
