@@ -5,7 +5,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 def init_db():
-    conn = sqlite3.connect("forum.db")
+    conn = sqlite3.connect("/tmp/forum.db")
     cur = conn.cursor()
 
     cur.execute("""
@@ -25,7 +25,7 @@ init_db()
 
 @app.route("/")
 def index():
-    conn = sqlite3.connect("forum.db")
+    conn = sqlite3.connect("/tmp/forum.db")
     cur = conn.cursor()
     cur.execute("SELECT pseudo, message, date FROM messages ORDER BY id DESC")
     messages = cur.fetchall()
@@ -39,7 +39,7 @@ def post():
     pseudo = request.form["pseudo"]
     message = request.form["message"]
 
-    conn = sqlite3.connect("forum.db")
+    conn = sqlite3.connect("/tmp/forum.db")
     cur = conn.cursor()
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
