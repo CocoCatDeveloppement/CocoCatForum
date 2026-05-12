@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Forum de CocoCat</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+    <h1>Bienvenue sur le forum de CocoCatDev ! </h1>
+
+
+    <form action="/post" method="post">
+            <label for="pseudo">Pseudo</label>
+            <input type="text" id="pseudo" name="pseudo" required>
+            <label for="message">Poste ton message !</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+
+            <button type="submit">Envoyer</button>
+    </form>
+    {% for pseudo, message, date in messages %}
+    <div id="messageaffiche">
+       <p> {{pseudo}} </p>
+       <p>{{message}}</p>
+       <p>{{date}}</p>
+    </div>
+    {%  endfor  %}
+</html>
