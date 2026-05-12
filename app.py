@@ -52,15 +52,22 @@ def post():
 
 @app.route("/like", methods=["POST"])
 def like():
-    msg_id = request.form["id"]
+    msg_id = request.json["id"]
 
     conn = sqlite3.connect("/tmp/forum.db")
     cur = conn.cursor()
+
+    # On incrémente
     cur.execute("UPDATE messages SET likes = likes + 1 WHERE id = ?", (msg_id,))
     conn.commit()
+
+    # On récupère le nouveau total
+    cur.execute("SELECT likes FROM messages WHERE id = ?", (msg_id,))
+    new_likes = cur.fetchone()[0]
+
     conn.close()
 
-    return redirect(url_for("index"))
+    return {"likes": new_likes}
 
 if __name__ == "__main__":
     app.run(debug=True)

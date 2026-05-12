@@ -27,10 +27,12 @@
     <p>{{ message }}</p>
     <p>{{ date }}</p>
 
-    <form action="/like" method="post">
-        <input type="hidden" name="id" value="{{ id }}">
-        <button type="submit"><span class="likeButton">{{ likes }}</span> ❤️</button>
-    </form>
+    <form class="like-form" data-id="{{ id }}">
+    <button type="button" class="like-btn">
+        <span class="likeButton">{{ likes }}</span> ❤️
+    </button>
+</form>
+
 </div>
 {% endfor %}
 </div>

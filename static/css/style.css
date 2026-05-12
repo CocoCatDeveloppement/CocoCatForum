@@ -90,3 +90,11 @@ button:hover {
     color: #777;
     font-size: 0.8rem;
 }
+
+.like-btn {
+    transition: transform 0.15s ease;
+}
+
+.like-btn.pop {
+    transform: scale(1.3);
+}
