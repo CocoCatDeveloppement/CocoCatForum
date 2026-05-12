@@ -21,6 +21,8 @@ def init_db():
     conn.close()
 
 
+init_db()
+
 @app.route("/")
 def index():
     conn = sqlite3.connect("forum.db")
@@ -52,5 +54,4 @@ def post():
     return redirect(url_for("index"))
 
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True)
