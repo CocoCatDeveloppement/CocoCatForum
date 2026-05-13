@@ -27,6 +27,7 @@ def init_db():
 
     conn.commit()
     conn.close()
+print("DATABASE_URL =", DATABASE_URL)
 
 init_db()
 
