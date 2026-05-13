@@ -1,16 +1,23 @@
 from flask import Flask, render_template, url_for, request, redirect
-import sqlite3
+import psycopg2
+import os
 from datetime import datetime
 
 app = Flask(__name__)
 
+# Connexion PostgreSQL via Railway
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+def get_db():
+    return psycopg2.connect(DATABASE_URL, sslmode="require")
+
 def init_db():
-    conn = sqlite3.connect("/tmp/forum.db")
+    conn = get_db()
     cur = conn.cursor()
 
     cur.execute("""
         CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             pseudo TEXT NOT NULL,
             message TEXT NOT NULL,
             date TEXT NOT NULL,
@@ -25,7 +32,7 @@ init_db()
 
 @app.route("/")
 def index():
-    conn = sqlite3.connect("/tmp/forum.db")
+    conn = get_db()
     cur = conn.cursor()
     cur.execute("SELECT id, pseudo, message, date, likes FROM messages ORDER BY id DESC")
     messages = cur.fetchall()
@@ -39,12 +46,14 @@ def post():
     message = request.form["message"]
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    conn = sqlite3.connect("/tmp/forum.db")
+    conn = get_db()
     cur = conn.cursor()
+
     cur.execute(
-        "INSERT INTO messages (pseudo, message, date) VALUES (?, ?, ?)",
+        "INSERT INTO messages (pseudo, message, date) VALUES (%s, %s, %s)",
         (pseudo, message, date)
     )
+
     conn.commit()
     conn.close()
 
@@ -54,15 +63,15 @@ def post():
 def like():
     msg_id = request.json["id"]
 
-    conn = sqlite3.connect("/tmp/forum.db")
+    conn = get_db()
     cur = conn.cursor()
 
-    # On incrémente
-    cur.execute("UPDATE messages SET likes = likes + 1 WHERE id = ?", (msg_id,))
+    # Incrémentation
+    cur.execute("UPDATE messages SET likes = likes + 1 WHERE id = %s", (msg_id,))
     conn.commit()
 
-    # On récupère le nouveau total
-    cur.execute("SELECT likes FROM messages WHERE id = ?", (msg_id,))
+    # Récupération du nouveau total
+    cur.execute("SELECT likes FROM messages WHERE id = %s", (msg_id,))
     new_likes = cur.fetchone()[0]
 
     conn.close()
