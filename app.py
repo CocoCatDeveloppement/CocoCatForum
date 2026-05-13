@@ -5,7 +5,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Connexion PostgreSQL via Railway
+# Railway → Variable d'environnement DATABASE_URL
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 def get_db():
@@ -66,11 +66,9 @@ def like():
     conn = get_db()
     cur = conn.cursor()
 
-    # Incrémentation
     cur.execute("UPDATE messages SET likes = likes + 1 WHERE id = %s", (msg_id,))
     conn.commit()
 
-    # Récupération du nouveau total
     cur.execute("SELECT likes FROM messages WHERE id = %s", (msg_id,))
     new_likes = cur.fetchone()[0]
 
