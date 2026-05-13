@@ -1,45 +1,65 @@
-function trierMessages() {
-    const container = document.getElementById("conteneur-message");
-    const messages = Array.from(container.getElementsByClassName('message'));
+async function chargerMessages() {
+    const res = await fetch("/messages_json");
+    const messages = await res.json();
 
-    messages.sort((a, b) => {
-        const likeA = parseInt(a.querySelector('.likeButton').innerText);
-        const likeB = parseInt(b.querySelector('.likeButton').innerText);
-        return likeB - likeA;
+    const groupes = {};
+
+    messages.forEach(msg => {
+        if (!groupes[msg.sujet]) groupes[msg.sujet] = [];
+        groupes[msg.sujet].push(msg);
     });
 
-    container.innerHTML = "";
-    messages.forEach(msg => container.appendChild(msg));
+    afficherGroupes(groupes);
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    trierMessages();
-});
+function afficherGroupes(groupes) {
+    const conteneur = document.getElementById("conteneur-message");
+    conteneur.innerHTML = "";
 
-document.querySelectorAll(".like-form").forEach(form => {
-    form.querySelector(".like-btn").addEventListener("click", async () => {
+    for (const sujet in groupes) {
+        const bloc = document.createElement("div");
+        bloc.className = "sujet-bloc";
 
-        const id = form.dataset.id;
+        bloc.innerHTML = `<h2>${sujet}</h2>`;
 
-        const response = await fetch("/like", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: id })
+        groupes[sujet].forEach(msg => {
+            bloc.innerHTML += `
+                <div class="message">
+                    <p><strong>${msg.pseudo}</strong></p>
+                    <p>${msg.message}</p>
+                    <p>${msg.date}</p>
+
+                    <button class="like-btn" data-id="${msg.id}">
+                        ${msg.likes} ❤️
+                    </button>
+                </div>
+            `;
         });
 
-        const data = await response.json();
+        conteneur.appendChild(bloc);
+    }
 
-        // Mise à jour instantanée du compteur
-        form.querySelector(".likeButton").innerText = data.likes;
+    activerLikes();
+}
 
-        // 🔥 Animation POP
-        const btn = form.querySelector(".like-btn");
-        btn.classList.add("pop");
-        setTimeout(() => btn.classList.remove("pop"), 150);
+function activerLikes() {
+    document.querySelectorAll(".like-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const id = btn.dataset.id;
 
-        // Relancer le tri
-        trierMessages();
+            const res = await fetch("/like", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id })
+            });
+
+            const data = await res.json();
+            btn.innerHTML = `${data.likes} ❤️`;
+
+            chargerMessages();
+        });
     });
-});
+}
 
+document.addEventListener("DOMContentLoaded", chargerMessages);
 

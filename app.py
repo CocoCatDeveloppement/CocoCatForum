@@ -1,11 +1,10 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, jsonify
 import psycopg2
 import os
 from datetime import datetime
 
 app = Flask(__name__)
 
-# Railway → Variable d'environnement DATABASE_URL
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 def get_db():
@@ -19,6 +18,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS messages (
             id SERIAL PRIMARY KEY,
             pseudo TEXT NOT NULL,
+            sujet TEXT NOT NULL,
             message TEXT NOT NULL,
             date TEXT NOT NULL,
             likes INTEGER NOT NULL DEFAULT 0
@@ -27,23 +27,17 @@ def init_db():
 
     conn.commit()
     conn.close()
-print("DATABASE_URL =", DATABASE_URL)
 
 init_db()
 
 @app.route("/")
 def index():
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute("SELECT id, pseudo, message, date, likes FROM messages ORDER BY id DESC")
-    messages = cur.fetchall()
-    conn.close()
-
-    return render_template("index.html", messages=messages)
+    return render_template("index.html")
 
 @app.route("/post", methods=["POST"])
 def post():
     pseudo = request.form["pseudo"]
+    sujet = request.form["sujet"]
     message = request.form["message"]
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -51,8 +45,8 @@ def post():
     cur = conn.cursor()
 
     cur.execute(
-        "INSERT INTO messages (pseudo, message, date) VALUES (%s, %s, %s)",
-        (pseudo, message, date)
+        "INSERT INTO messages (pseudo, sujet, message, date) VALUES (%s, %s, %s, %s)",
+        (pseudo, sujet, message, date)
     )
 
     conn.commit()
@@ -77,5 +71,28 @@ def like():
 
     return {"likes": new_likes}
 
+@app.route("/messages_json")
+def messages_json():
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT id, pseudo, sujet, message, date, likes FROM messages ORDER BY id DESC")
+    rows = cur.fetchall()
+    conn.close()
+
+    messages = [
+        {
+            "id": r[0],
+            "pseudo": r[1],
+            "sujet": r[2],
+            "message": r[3],
+            "date": r[4],
+            "likes": r[5]
+        }
+        for r in rows
+    ]
+
+    return jsonify(messages)
+
 if __name__ == "__main__":
     app.run(debug=True)
+

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Forum de CocoCat</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/script.js')  }}" defer></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
 </head>
 
 <body>
@@ -15,27 +15,17 @@
     <label for="pseudo">Pseudo</label>
     <input type="text" id="pseudo" name="pseudo" required>
 
+    <label for="sujet">Sujet de discussion</label>
+    <input type="text" id="sujet" name="sujet" required>
+
     <label for="message">Poste ton (beau) message !</label>
     <textarea id="message" name="message" rows="5" required></textarea>
 
     <button type="submit">Envoyer</button>
 </form>
-<div id="conteneur-message">
-{% for id, pseudo, message, date, likes in messages %}
-<div class="message">
-    <p><strong>{{ pseudo }}</strong></p>
-    <p>{{ message }}</p>
-    <p>{{ date }}</p>
 
-    <form class="like-form" data-id="{{ id }}">
-    <button type="button" class="like-btn">
-        <span class="likeButton">{{ likes }}</span> ❤️
-    </button>
-</form>
-
-</div>
-{% endfor %}
-</div>
+<!-- IMPORTANT : on laisse vide, le JS va remplir -->
+<div id="conteneur-message"></div>
 
 </body>
 </html>
