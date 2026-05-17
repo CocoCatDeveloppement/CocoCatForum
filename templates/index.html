@@ -10,7 +10,30 @@
 <body>
 
 <h1>Bienvenue sur le forum de CocoCatDev !</h1>
+<!-- Barre de recherche -->
+<form action="{{ url_for('recherche') }}" method="POST">
+    <input type="text" name="Recherche" placeholder="Rechercher...">
+    <button type="submit">Valider</button>
+</form>
 
+<!-- Si l'utilisateur vient de faire une recherche -->
+{% if recherche %}
+    <h3>Résultats pour la recherche : "{{ recherche }}"</h3>
+    <a href="{{ url_for('index') }}">Afficher tous les messages</a>
+{% endif %}
+
+<!-- Affichage des messages -->
+<div id="messages-container">
+    {% for msg in messages %}
+        <div class="message">
+            <h4>{{ msg.sujet }} (par {{ msg.pseudo }})</h4>
+            <p>{{ msg.message }}</p>
+            <small>Posté le {{ msg.date }} - {{ msg.likes }} Likes</small>
+        </div>
+    {% else %}
+        <p>Aucun message ne correspond à votre recherche.</p>
+    {% endfor %}
+</div>
 <form action="/post" method="post">
     <label for="pseudo">Pseudo</label>
     <input type="text" id="pseudo" name="pseudo" required>
